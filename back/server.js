@@ -20,15 +20,25 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
 app.post('/api/login', (req, res) => {
-    console.log(req.body);
     User.findOne(req.body, (err, user) => {
         if (err) {
             console.log(err)
         } 
         else {
-            res.redirect('/')
+            res.status(200).json({user})
         }
     })
+});
+
+app.post('/api/register', (req, res) => {
+    const user = new User({
+        ...req.body
+    });
+    user.save().then((user) => {
+        console.log(user);
+        res.status(201).json({ msg: 'user enregistré' })
+    })
+    .catch(err => res.status(400).json({err}))
 });
 
 app.post('/api/add-products/:restaurant', (req, res) => {
