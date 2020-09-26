@@ -1,10 +1,13 @@
+const path = require('path');
+require('dotenv').config({path: path.join(__dirname, '..', '.env')});
 const express = require('express');
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
-const path = require('path');
-require('dotenv').config({path: path.join(__dirname, '..', '.env')});
 
-const User = require('./models/User');
+/** ROUTES */
+const home = require('./routes/home/home');
+const users = require('./routes/user/user');
+const restaurants = require('./routes/restaurants/restaurants');
 
 const app = express();
 
@@ -16,51 +19,12 @@ mongoose.connect(`mongodb+srv://${process.env.DB_USER}:${process.env.USER_PASS}@
   .then(() => console.log('Connexion à MongoDB réussie !'))
   .catch(() => console.log('Connexion à MongoDB échouée !'));
 
+/** MIDDLEWARE */
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
-
-app.post('/api/login', (req, res) => {
-    User.findOne(req.body, (err, user) => {
-        if (err) {
-            console.log(err)
-        } 
-        else {
-            res.status(200).json({user})
-        }
-    })
-});
-
-app.post('/api/register', (req, res) => {
-    const user = new User({
-        ...req.body
-    });
-    user.save().then((user) => {
-        console.log(user);
-        res.status(201).json({ msg: 'user enregistré' })
-    })
-    .catch(err => res.status(400).json({err}))
-});
-
-app.post('/api/add-products/:restaurant', (req, res) => {
-    
-});
-
-app.post('/api/order/:restaurant', (req, res) => {
-    
-});
-
-app.get('/', (req, res) => {
-    res.send('Welcome to my food');
-})
-
-app.get('/api/restaurants', (req, res) => {
-    res.send('restaurants works')
-});
-
-app.get('/api/products/:restaurant', (req, res) => {
-    res.send('products restaurants works')
-});
-
+app.use('/', home);
+app.use('/api/users', users);
+app.use('/api/restaurants', restaurants);
 
 app.listen(port, () => {
     console.log(`server listening on port ${port}`);
